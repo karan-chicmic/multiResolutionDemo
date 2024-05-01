@@ -19,11 +19,14 @@ export class fitModeScript extends Component {
     state: boolean = true;
     ratio = 0;
 
+    childWidth: number;
+    childHeight: number;
+
     @property({ type: Enum(fitModes) })
     set mode(val) {
         this.fitMode = val;
         console.log(this.fitMode);
-        this.onaction(val);
+        this.onaction();
     }
     get mode() {
         console.log("get fit mode", this.fitMode);
@@ -31,32 +34,33 @@ export class fitModeScript extends Component {
     }
 
     start() {}
-    onaction(val: fitModes) {
+    onaction() {
         const parentWidth = this.getSize(this.node.parent).width;
         const parentHeight = this.getSize(this.node.parent).height;
-        const childWidth = this.getSize(this.node).width;
-        const childHeight = this.getSize(this.node).height;
+        this.childWidth = this.getSize(this.node).width;
+        this.childHeight = this.getSize(this.node).height;
 
         switch (this.fitMode) {
             case 1: {
                 if (parentWidth < parentHeight) {
-                    this.ratio = this.getFitWidthRatio(parentWidth, childWidth);
-                    this.node.setScale(this.ratio, 1);
+                    this.ratio = this.getFitWidthRatio(parentWidth, this.childWidth);
+                    this.changeContentSize(this.ratio);
+
                     break;
                 } else {
-                    this.ratio = this.getFitHeightRatio(parentHeight, childHeight);
-                    this.node.setScale(1, this.ratio);
+                    this.ratio = this.getFitHeightRatio(parentHeight, this.childHeight);
+                    this.changeContentSize(this.ratio);
                     break;
                 }
             }
             case 2: {
-                this.ratio = this.getFitWidthRatio(parentWidth, childWidth);
-                this.node.setScale(this.ratio, 1);
+                this.ratio = this.getFitWidthRatio(parentWidth, this.childWidth);
+                this.changeContentSize(this.ratio);
                 break;
             }
             case 3: {
-                this.ratio = this.getFitHeightRatio(parentHeight, childHeight);
-                this.node.setScale(1, this.ratio);
+                this.ratio = this.getFitHeightRatio(parentHeight, this.childHeight);
+                this.changeContentSize(this.ratio);
                 break;
             }
         }
@@ -76,5 +80,9 @@ export class fitModeScript extends Component {
     }
     getFitWidthRatio(parentWidth: number, childWidth: number) {
         return parentWidth / childWidth;
+    }
+
+    changeContentSize(ratio: number) {
+        this.node.getComponent(UITransform).setContentSize(this.childWidth * this.ratio, this.childHeight * this.ratio);
     }
 }
